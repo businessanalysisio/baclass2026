@@ -1,0 +1,17 @@
+{
+  "name": "sol-mascot",
+  "version": "1.0.0",
+  "private": true,
+  "description": "SOL — the Forward Deployed Business Analyst mascot, built from Unicode Block Elements and exported as PNG, GIF and MP4.",
+  "type": "module",
+  "scripts": {
+    "check": "node scripts/check-grid.mjs mascots/sol.html",
+    "render": "node scripts/render.mjs --input mascots/sol.html --name sol --out assets --selector .stage --width 600 --height 600 --fps 15 --duration 5200 --scale 2 --hero 12 --formats png,gif,mp4",
+    "render:png": "node scripts/render.mjs --input mascots/sol.html --name sol --out assets --selector .stage --fps 15 --duration 5200 --hero 12 --formats png",
+    "build": "npm run check && npm run render"
+  },
+  "devDependencies": {
+    "playwright": "^1.56.0"
+  },
+  "engines": { "node": ">=18" }
+}

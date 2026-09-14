@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>SOL — Forward Deployed Business Analyst</title>
+<style>
+  /* ---- mascot: SOL -----------------------------------------------------
+     CONCEPT    A young forward-deployed business analyst who sits with the
+                business, asks the better question, and turns it into impact.
+     SOUL       "Better questions, brighter outcomes." SOL is the sunrise in
+                the room: curious, optimistic, action-oriented.
+     SILHOUETTE Deliberately NOT a limbed robot (Clawd) or an orb (Xo): a
+                human figure whose signature is a hair mass WIDER than the
+                head with a swoop leaning right, a sky-blue shirt inside a
+                grey suit, a tablet held in both hands, and sneakers with a
+                SOL-orange outer accent.
+     CHANNEL    SOL emotes through EYES + an INSIGHT SPARK above the head.
+                The loop is the analyst's actual job: idle -> read the
+                tablet -> focus -> the idea lands -> share it -> back to work.
+     PALETTE    SOL Orange #FF7A2F · Charcoal #2E2E2E · Sky Blue #BFD7F4
+                Cream #FFF6E8 · Skin #F5C7A7.  Suit grey #56544F is derived
+                from Charcoal so the hair still reads against the jacket.
+     TECHNIQUE  Three stacked grids in the same monospace cell box:
+                  BASE    - the solid silhouette (where hair/skin/suit are)
+                  HAIR    - the fringe overhanging the forehead
+                  FEATURE - eyes, mouth, tablet and spark drawn ON TOP
+                Half- and quarter-blocks put a feature in the upper or lower
+                half of a cell, so the face can read fringe -> skin -> eyes
+                -> skin -> mouth -> chin. One flat grid can't: one cell
+                holds exactly one colour.
+     MEDIUM     Unicode Block Elements only (U+2580-U+259F). 11 cols x 10 rows.
+  --------------------------------------------------------------------- */
+  html, body { margin: 0; background: #FFF6E8; font-family: monospace; overflow: hidden; }
+  .stage {
+    position: relative;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle at 50% 34%, #FFF6E8 0%, #FFE7D2 52%, #FFD4B2 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding-bottom: 36px;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+  /* soft sun behind SOL — the "SOL" in the name */
+  .stage::before {
+    content: "";
+    position: absolute;
+    width: 330px; height: 330px;
+    top: 66px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,122,47,0.22) 0%, rgba(255,122,47,0) 70%);
+  }
+  #mascot {
+    position: relative;
+    display: inline-block;
+    font-size: 40px;
+    line-height: 1.0;
+    white-space: pre;
+    text-align: left;
+    user-select: none;
+    transition: transform 0.16s ease;
+  }
+  #mascot pre { margin: 0; font: inherit; }
+  /* the base layer sits in flow and sizes the box; the others stack on top */
+  #mascot #hair, #mascot #feat { position: absolute; top: 0; left: 0; }
+  /* per-cell colours — one span per run of same-coloured glyphs */
+  #mascot .hair   { color: #2E2E2E; }
+  #mascot .skin   { color: #F5C7A7; }
+  #mascot .eye    { color: #2E2E2E; }
+  #mascot .suit   { color: #56544F; }
+  #mascot .shirt  { color: #BFD7F4; }
+  #mascot .sol    { color: #FF7A2F; }
+  #mascot .cream  { color: #FFF6E8; }
+  #mascot .spark  { color: #FF7A2F; text-shadow: 0 0 24px rgba(255,122,47,0.9); }
+  #mascot .lit    { color: #FFF6E8; text-shadow: 0 0 16px rgba(255,122,47,1); }
+
+  #wordmark {
+    margin-top: 30px;
+    font-size: 40px;
+    font-weight: 700;
+    letter-spacing: 10px;
+    color: #2E2E2E;
+    text-indent: 10px;
+  }
+  #underline { width: 96px; height: 5px; background: #FF7A2F; border-radius: 3px; margin-top: 8px; }
+  #role {
+    margin-top: 12px;
+    font-size: 12px;
+    letter-spacing: 3.5px;
+    text-transform: uppercase;
+    color: #8A7E73;
+    text-indent: 3.5px;
+  }
+  #tagline {
+    position: absolute;
+    bottom: 22px;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+    color: #FF7A2F;
+    font-style: italic;
+  }
+</style>
+</head>
+<body>
+<div class="stage">
+  <div id="mascot"><pre id="base"></pre><pre id="hair"></pre><pre id="feat"></pre></div>
+  <div id="wordmark">SOL</div>
+  <div id="underline"></div>
+  <div id="role">Forward Deployed Business Analyst</div>
+  <div id="tagline">Better questions, brighter outcomes.</div>
+</div>
+<script>
+/* ---------------------------------------------------------------------
+   Every row is [glyphs, mask] — equal length, one mask letter per glyph:
+     h hair · s skin · e eye · j suit · b shirt · o SOL orange
+     c cream · * spark (glow) · ! lit screen (glow) · space = draw nothing
+   The grid is 11 columns wide; column 5 is the centre line.
+   --------------------------------------------------------------------- */
+const CLS = { h:"hair", s:"skin", e:"eye", j:"suit", b:"shirt",
+              o:"sol", c:"cream", "*":"spark", "!":"lit" };
+
+const BLANK = ["           ", "           "];
+
+// --- BASE: the silhouette. This never changes. -----------------------
+const BASE = [
+  BLANK,                                          // r0  spark airspace
+  ["   ▗▄▄▄▄▖  ", "   hhhhhh  "],                 // r1  hair top, swoop right
+  ["  ▐██████▌ ", "  hhhhhhhh "],                 // r2  hair mass, wider than the head
+  ["   █████   ", "   sssss   "],                 // r3  forehead under the fringe
+  ["   █████   ", "   sssss   "],                 // r4  eye line
+  ["   ▀███▀   ", "   sssss   "],                 // r5  jaw + mouth
+  ["  ▟█████▙  ", "  jjjbjjj  "],                 // r6  shoulders + collar
+  ["  ▐█████▌  ", "  jjjbjjj  "],                 // r7  torso, sky-blue shirt strip
+  ["   ██ ██   ", "   jj jj   "],                 // r8  legs
+  ["   ▄▄ ▄▄   ", "   cc cc   "],                 // r9  sneakers
+];
+
+// --- FEATURE parts: drawn on top of the silhouette -------------------
+const FRINGE  = ["   ▀▀▀▀▀   ", "   hhhhh   "];   // hair overhanging row 3
+const ACCENT  = ["   ▖   ▗   ", "   o   o   "];   // sneaker outer accents
+
+const sparks = {                                  // the insight, above the head
+  none:  BLANK,
+  small: ["     ▘     ", "     *     "],
+  mid:   ["    ▗▄▖    ", "    ***    "],
+  big:   ["   ▘▗█▖▝   ", "   *****   "],
+};
+
+const eyes = {                                    // upper half of row 4 — a band of skin
+  open:  ["    ▀ ▀    ", "    e e    "],          // keeps them off the fringe above
+  blink: ["    ▘ ▝    ", "    e e    "],          // squinted shut
+  left:  ["   ▀ ▀     ", "   e e     "],          // glancing at the tablet
+  right: ["     ▀ ▀   ", "     e e   "],          // glancing back at you
+  wide:  ["   ▀▀ ▀▀   ", "   ee ee   "],          // the idea landing — eyes go big
+};
+
+const mouths = {                                  // upper half of the jaw row
+  smile: ["     ▀     ", "     e     "],
+  flat:  ["     ▘     ", "     e     "],           // focused, reading
+  open:  ["    ▀▀▀    ", "    eee    "],           // "oh — THAT's the question"
+};
+
+const tablet = {                                  // both hands + the device
+  dim:    ["   ▀▀▀▀▀   ", "   sooos   "],          // held at chest height
+  bright: ["   ▀▀▀▀▀   ", "   s!!!s   "],          // screen lights up while reading
+};
+
+// --- rendering -------------------------------------------------------
+function rowHTML(glyphs, mask) {
+  let out = "", run = "", cur = null;
+  const flush = () => {
+    if (!run) return;
+    out += cur === " " ? run : '<span class="' + CLS[cur] + '">' + run + "</span>";
+    run = "";
+  };
+  for (let i = 0; i < glyphs.length; i++) {
+    const m = mask[i] || " ";
+    if (m !== cur) { flush(); cur = m; }
+    run += glyphs[i];
+  }
+  flush();
+  return out;
+}
+const gridHTML = (rows) => rows.map((r) => rowHTML(r[0], r[1])).join("\n");
+
+const elMascot = document.getElementById("mascot");
+const elBase   = document.getElementById("base");
+const elFeat   = document.getElementById("feat");
+elBase.innerHTML = gridHTML(BASE);
+// the hair layer only carries the fringe. Keeping it off the feature layer
+// means the eyes can move around row 4 without ever colliding with it.
+document.getElementById("hair").innerHTML = gridHTML([
+  BLANK, BLANK, BLANK, FRINGE, BLANK, BLANK, BLANK, BLANK, BLANK, BLANK,
+]);
+
+function render({ spark, eye, mouth, screen, bob, tilt }) {
+  elFeat.innerHTML = gridHTML([
+    sparks[spark],   // r0
+    BLANK,           // r1
+    BLANK,           // r2
+    BLANK,           // r3  (fringe lives on the hair layer)
+    eyes[eye],       // r4
+    mouths[mouth],   // r5
+    BLANK,           // r6
+    tablet[screen],  // r7
+    BLANK,           // r8
+    ACCENT,          // r9
+  ]);
+  elMascot.style.transform = `translateY(${bob}px) rotate(${tilt}deg)`;
+}
+
+/* The loop IS the job. Total period 5200ms  ->  render with --duration 5200 */
+const sequence = [
+  { spark:"none",  eye:"open",  mouth:"smile", screen:"dim",    bob:0,   tilt:0,    ms:900 }, // idle
+  { spark:"none",  eye:"blink", mouth:"smile", screen:"dim",    bob:0,   tilt:0,    ms:120 },
+  { spark:"none",  eye:"open",  mouth:"smile", screen:"dim",    bob:0,   tilt:0,    ms:480 },
+  { spark:"none",  eye:"left",  mouth:"flat",  screen:"bright", bob:2,   tilt:-1.5, ms:700 }, // read
+  { spark:"none",  eye:"left",  mouth:"flat",  screen:"bright", bob:2,   tilt:-1.5, ms:600 }, // analyse
+  { spark:"none",  eye:"blink", mouth:"flat",  screen:"bright", bob:2,   tilt:0,    ms:120 },
+  { spark:"small", eye:"wide",  mouth:"open",  screen:"bright", bob:-4,  tilt:0,    ms:260 }, // !
+  { spark:"mid",   eye:"wide",  mouth:"open",  screen:"bright", bob:-8,  tilt:0,    ms:260 },
+  { spark:"big",   eye:"wide",  mouth:"open",  screen:"bright", bob:-12, tilt:0,    ms:380 }, // INSIGHT
+  { spark:"mid",   eye:"wide",  mouth:"open",  screen:"bright", bob:-6,  tilt:1.5,  ms:300 }, // share it
+  { spark:"small", eye:"right", mouth:"smile", screen:"dim",    bob:-2,  tilt:1.5,  ms:480 },
+  { spark:"none",  eye:"open",  mouth:"smile", screen:"dim",    bob:0,   tilt:0,    ms:600 }, // back to work
+];  // = 5200ms
+
+let step = 0;
+function animate() {
+  const s = sequence[step % sequence.length];
+  render(s);
+  step++;
+  setTimeout(animate, s.ms);
+}
+animate();
+</script>
+</body>
+</html>
