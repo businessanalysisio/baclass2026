@@ -57,6 +57,14 @@ delivery yet — go back and find the missing evidence or rule.
 5. See [`cases/example-sfcc-mailchimp/`](cases/example-sfcc-mailchimp/README.md)
    for a full worked example, end to end.
 
+## Lessons
+
+The seven-module curriculum, **Business Analysis As I Know It**, is taught
+in Vietnamese under [`lessons/`](lessons/README.md). English BA terms stay
+in English. Each lesson teaches one module, names the template to practice,
+and says what done looks like. Templates are unchanged — copy them into a
+case before filling anything in.
+
 ## Where AI fits
 
 The goal is not "ask AI to write the PRD." AI is useful once you've built
